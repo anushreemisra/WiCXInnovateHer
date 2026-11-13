@@ -2,14 +2,20 @@
 // metrics. The score engine has to work everything out from the raw records, just as it would
 // for a real customer.
 
-import type { AdaData, Invoice, Transaction, TransactionType } from "./types.ts";
+import type { AdaData, EntityType, Invoice, Transaction, TransactionType } from "./types.ts";
 
 export const AS_OF = "2026-11-01";
+
+export type Metro = "sf-bay" | "austin" | "atlanta" | "nyc";
 
 export interface BusinessParams {
   name: string;
   business: string;
   location: string;
+  metro: Metro;
+  state: string;
+  entityType: EntityType;
+  naics: string;
   founded: string;
   months: number; // months of history to generate
   revenue: number; // monthly revenue at the start of the history
@@ -28,24 +34,28 @@ export interface BusinessParams {
 export const DEMO_BUSINESSES = {
   maya: {
     name: "Maya", business: "Brand design studio (solo)", location: "Oakland, CA",
+    metro: "sf-bay", state: "CA", entityType: "llc", naics: "541430",
     founded: "2022-09-01", months: 18, revenue: 15000, growth: 0.015, seasonality: 0.08,
     clients: [0.65, 0.1, 0.1, 0.05, 0.05, 0.05], invoicedShare: 1, payDelay: 42,
     opex: 5500, debt: 0, ownerDraw: 9500, startBalance: 3000, personal: 0.15,
   },
   priya: {
     name: "Priya", business: "Bakery with catering", location: "Austin, TX",
+    metro: "austin", state: "TX", entityType: "llc", naics: "311811",
     founded: "2025-05-01", months: 18, revenue: 26000, growth: 0.005, seasonality: 0.2,
     clients: [0.06, 0.04], invoicedShare: 0.1, payDelay: 20,
     opex: 21000, debt: 1400, ownerDraw: 2500, startBalance: 8000, personal: 0.02,
   },
   dana: {
     name: "Dana", business: "Home cleaning service", location: "Atlanta, GA",
+    metro: "atlanta", state: "GA", entityType: "sole_proprietorship", naics: "561720",
     founded: "2019-03-01", months: 18, revenue: 8000, growth: 0, seasonality: 0.05,
     clients: Array(25).fill(1 / 25), invoicedShare: 1, payDelay: 10,
     opex: 2400, debt: 0, ownerDraw: 4800, startBalance: 9000, personal: 0.25,
   },
   lena: {
     name: "Lena", business: "Fitness studio (opened this year)", location: "Brooklyn, NY",
+    metro: "nyc", state: "NY", entityType: "corporation", naics: "713940",
     founded: "2026-01-01", months: 10, revenue: 6000, growth: 0.08, seasonality: 0.05,
     clients: [], invoicedShare: 0, payDelay: 0,
     opex: 11000, debt: 600, ownerDraw: 0, startBalance: 40000, personal: 0,
@@ -105,6 +115,9 @@ export function generate(p: BusinessParams, seed = 7): AdaData {
   }
   return {
     transactions, invoices,
-    profile: { name: p.name, business: p.business, location: p.location, founded: p.founded },
+    profile: {
+      name: p.name, business: p.business, location: p.location, founded: p.founded,
+      entityType: p.entityType, naics: p.naics, state: p.state,
+    },
   };
 }
