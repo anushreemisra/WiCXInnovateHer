@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import type { Metro } from "@/lib/ada/demo-businesses.ts";
+import { useMemo, useState } from "react";
 import { SOURCES, VERIFIED_ON } from "@/lib/funding/sources.ts";
 import { TYPE_LABEL, rankSources, type Reason, type SourceType } from "@/lib/funding/rank.ts";
 import { useWorkspace } from "../Workspace";
-
-const METROS: { value: Metro; label: string; state: string }[] = [
-  { value: "sf-bay", label: "San Francisco Bay Area, CA", state: "CA" },
-  { value: "austin", label: "Austin, TX", state: "TX" },
-  { value: "atlanta", label: "Atlanta, GA", state: "GA" },
-  { value: "nyc", label: "New York City, NY", state: "NY" },
-];
 
 const GROUPS: { label: string; types: SourceType[] }[] = [
   { label: "Loans", types: ["cdfi", "microlender", "sba_microloan", "bank", "credit_union", "zero_interest_loan", "matching_tool"] },
@@ -29,17 +21,12 @@ const TRUST_LABEL = { high: "Verified terms", medium: "Program page", low: "Thei
 
 export function FinderScreen() {
   const { business, result } = useWorkspace();
-  const [metro, setMetro] = useState<Metro>(business.metro);
   const [group, setGroup] = useState<string>("All");
-  const [startup, setStartup] = useState(false);
-  // Follow the demo business's location when it changes.
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- sync with the shared business
-  useEffect(() => setMetro(business.metro), [business.metro]);
-
-  const state = METROS.find((m) => m.value === metro)!.state;
+  // Location comes from the business profile in Ada.
+  const { metro, state } = business;
   const ranked = useMemo(
-    () => rankSources(SOURCES, { metro, state, band: result.band, capacity: result.capacity, startup }),
-    [metro, state, result.band, result.capacity, startup],
+    () => rankSources(SOURCES, { metro, state, band: result.band, capacity: result.capacity }),
+    [metro, state, result.band, result.capacity],
   );
   const shown = group === "All" ? ranked : ranked.filter((r) => GROUPS.find((g) => g.label === group)!.types.includes(r.source.type));
 
@@ -47,20 +34,14 @@ export function FinderScreen() {
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <header>
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">Funding Finder</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Who funds women-owned businesses near you</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Who funds women-owned businesses near {business.location}</h1>
         <p className="mt-1 text-ink-soft">
           Ranked by: serves your area, fits your band ({result.band.name}), amount within what you could borrow
           ({money(result.capacity)}), then focus on women-owned businesses. Rankings never depend on referral fees.
         </p>
       </header>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-muted">Location</span>
-          <select value={metro} onChange={(e) => setMetro(e.target.value as Metro)} className="rounded-lg border border-line bg-paper px-3 py-2">
-            {METROS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </label>
+      <div className="rounded-2xl border border-line bg-card p-4">
         <div className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-muted">Show</span>
           <div className="flex flex-wrap gap-2">
@@ -76,10 +57,6 @@ export function FinderScreen() {
             ))}
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm sm:ml-auto">
-          <input type="checkbox" checked={startup} onChange={(e) => setStartup(e.target.checked)} className="h-4 w-4" />
-          I’m building a high-growth startup
-        </label>
       </div>
 
       <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
@@ -93,7 +70,7 @@ export function FinderScreen() {
 
       <ol className="flex flex-col gap-3">
         {shown.map(({ source: s, reasons, cautions }, i) => (
-          <li key={s.id} className={`rounded-2xl border bg-card p-5 ${s.ventureOnly && !startup ? "border-line opacity-70" : "border-line"}`}>
+          <li key={s.id} className={`rounded-2xl border bg-card p-5 ${s.ventureOnly ? "border-line opacity-70" : "border-line"}`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted">

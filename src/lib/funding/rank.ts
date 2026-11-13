@@ -100,7 +100,7 @@ const TYPE_WHO: Record<SourceType, string> = {
 
 export function rankSources(
   sources: FundingSource[],
-  opts: { metro: Metro; state: string; band: Band; capacity: number; startup: boolean },
+  opts: { metro: Metro; state: string; band: Band; capacity: number },
 ): Ranked[] {
   const local = sources.filter(
     (s) => s.scope === "national" || s.metros.includes(opts.metro) || s.states.includes(opts.state),
@@ -179,11 +179,12 @@ export function rankSources(
 
       score += { high: 5, medium: 2, low: 0 }[s.trust];
 
-      if (s.ventureOnly && !opts.startup) {
+      // Investors fund high-growth startups, not most small businesses: listed last, clearly labeled.
+      if (s.ventureOnly) {
         score -= 100;
         cautions.unshift({
           text: "Only for high-growth startups seeking investors",
-          why: `${s.name} invests in early-stage companies aiming for large markets. Tick “I’m building a high-growth startup” to rank it normally.`,
+          why: `${s.name} invests in early-stage companies aiming for very large markets, which is why it’s listed last.`,
           links: [site],
         });
       }
