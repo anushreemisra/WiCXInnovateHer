@@ -1,7 +1,6 @@
 "use client";
 
 import { WOSB, wosbRequirements } from "@/lib/apply/programs.ts";
-import { ENTITY_LABEL } from "@/lib/apply/requirements.ts";
 import { useWorkspace } from "../Workspace";
 import { useAdaBuilt } from "./AdaBuilt";
 import { SideCard, ToolkitLayout } from "./ToolkitLayout";
@@ -18,7 +17,7 @@ export function WosbScreen() {
       intro={
         <>
           Certification lets you bid on federal contracts set aside for women-owned small businesses. The government’s goal is{" "}
-          {WOSB.contractingGoal} of contract dollars. Your checklist below is set up for your business type: {ENTITY_LABEL[data.profile.entityType]}.
+          {WOSB.contractingGoal} of contract dollars.
         </>
       }
       items={items}

@@ -33,9 +33,6 @@ export function ScoreScreen() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-accent">Fundability Score</p>
           <h1 className="text-3xl font-semibold tracking-tight">How a lender would read your books</h1>
-          <p className="mt-1 text-ink-soft">
-            Built from 12 months of your Ada transactions and invoices. Business data only; this is not a credit decision.
-          </p>
         </div>
       </header>
 
