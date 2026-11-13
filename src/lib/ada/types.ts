@@ -21,12 +21,17 @@ export interface Invoice {
   paid: string | null;
 }
 
+export type EntityType = "sole_proprietorship" | "partnership" | "llc" | "corporation";
+
 /** Business profile. */
 export interface Profile {
   name: string;
   business: string;
   location: string;
   founded: string;
+  entityType: EntityType;
+  naics: string; // industry code
+  state: string;
 }
 
 export interface AdaData {

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AS_OF, DEMO_BUSINESSES, generate, type DemoBusinessKey } from "@/lib/ada/demo-businesses.ts";
-import { applyFix, computeMetrics, score, type FixKey } from "@/lib/fundability/engine.ts";
+import { useEffect, useMemo, useState } from "react";
+import { applyFix, score, type FixKey } from "@/lib/fundability/engine.ts";
+import { useWorkspace } from "../Workspace";
 import { BandLadder, FactorList, NextBandPanel, RulesList, ScoreCard } from "./parts";
 
 const FIX_LABELS: Record<FixKey, string> = {
@@ -14,13 +14,12 @@ const FIX_LABELS: Record<FixKey, string> = {
 };
 
 export function ScoreScreen() {
-  const [businessKey, setBusinessKey] = useState<DemoBusinessKey>("maya");
+  const { businessKey, metrics: baseMetrics, result: baseline } = useWorkspace();
   const [applied, setApplied] = useState<FixKey[]>([]);
-  const business = DEMO_BUSINESSES[businessKey];
+  // A different business starts with no simulated fixes.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when the shared business changes
+  useEffect(() => setApplied([]), [businessKey]);
 
-  // Metrics come from 18 months of raw Ada records, computed once per business.
-  const baseMetrics = useMemo(() => computeMetrics(generate(business), AS_OF), [business]);
-  const baseline = useMemo(() => score(baseMetrics), [baseMetrics]);
   const current = useMemo(
     () => score(applied.reduce(applyFix, baseMetrics)),
     [applied, baseMetrics],
@@ -30,7 +29,7 @@ export function ScoreScreen() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <header>
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-accent">Fundability Score</p>
           <h1 className="text-3xl font-semibold tracking-tight">How a lender would read your books</h1>
@@ -38,23 +37,6 @@ export function ScoreScreen() {
             Built from 12 months of your Ada transactions and invoices. Business data only; this is not a credit decision.
           </p>
         </div>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-muted">Demo business</span>
-          <select
-            value={businessKey}
-            onChange={(e) => {
-              setBusinessKey(e.target.value as DemoBusinessKey);
-              setApplied([]);
-            }}
-            className="rounded-lg border border-line bg-card px-3 py-2 text-ink"
-          >
-            {Object.entries(DEMO_BUSINESSES).map(([key, b]) => (
-              <option key={key} value={key}>
-                {b.name} · {b.business} · {b.location}
-              </option>
-            ))}
-          </select>
-        </label>
       </header>
 
       {applied.length > 0 && (
