@@ -59,7 +59,6 @@ function Shell({ children }: { children: React.ReactNode }) {
               {label}
             </span>
           ))}
-          <p className="px-3 pt-1 text-xs text-paper/45">Runway reads their data; it doesn’t rebuild them.</p>
         </nav>
       </aside>
 
